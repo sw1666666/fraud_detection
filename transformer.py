@@ -21,7 +21,7 @@ test_labels = np.asarray([[1.0, 0.0] if l == 1 else [0.0, 1.0] for l in utils.te
 
 num_features = 10
 num_labels = 2
-num_dim = 128
+num_dim = 64
 
 probs = [1.0] * len(train_labels)
 for i, l in enumerate(utils.train_labels):
@@ -38,7 +38,7 @@ is_training = tf.placeholder(dtype = tf.bool, shape = ())
 
 config = attention.BertConfig(vocab_size=embed.max_ind + 1, 
                              hidden_size=num_dim, 
-                             num_hidden_layers=4, 
+                             num_hidden_layers=2, 
                              num_attention_heads=4, 
                              intermediate_size=num_dim * 4)
 
@@ -56,7 +56,7 @@ output_weights = tf.get_variable(
 output_bias = tf.get_variable(
       "output_bias", [2], initializer=tf.zeros_initializer())
 
-keep_prob = tf.cond(is_training, lambda: 0.9, lambda: 1.0)
+keep_prob = tf.cond(is_training, lambda: 0.5, lambda: 1.0)
 output_layer = tf.nn.dropout(output_layer, keep_prob=keep_prob)
 logits = tf.matmul(output_layer, output_weights, transpose_b=True)
 loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels = Y, logits = logits))
@@ -84,7 +84,7 @@ with tf.Session() as sess:
 
 new_test_labels = [1 - l for l in utils.test_labels]
 
-print(precision_recall_fscore_support(new_test_labels, predicts, average = 'binary'))
+print(precision_recall_fscore_support(new_test_labels, predicts, average = 'macro'))
 print(roc_auc_score(new_test_labels, predicts))
 
     

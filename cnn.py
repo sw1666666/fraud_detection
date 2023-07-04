@@ -20,6 +20,15 @@ test_labels = np.asarray([[1.0, 0.0] if l == 1 else [0.0, 1.0] for l in utils.te
 num_features = 10
 num_labels = 2
 
+probs = [1.0] * len(train_labels)
+for i, l in enumerate(utils.train_labels):
+    if l == 1:
+        probs[i] *= 3
+
+total = sum(probs)
+for i, p in enumerate(probs):
+    probs[i] /= total
+
 X = tf.placeholder(dtype = tf.float32, shape = [None, num_features, 1])
 Y = tf.placeholder(dtype = tf.float32, shape = [None, num_labels])
 
@@ -46,7 +55,7 @@ opt = tf.train.AdamOptimizer().minimize(loss)
 with tf.Session() as sess:
     sess.run(tf.global_variables_initializer())
     for step in range(50000):
-        inds = np.random.choice(len(train_features), size = batch_size)
+        inds = np.random.choice(len(train_features), size = batch_size, p = probs)
         lv, _ = sess.run([loss, opt], feed_dict = {X: train_features[inds], Y: train_labels[inds]})
         if step % 100 == 0:
             print('step: %d, loss: %f'%(step, lv))
@@ -57,7 +66,7 @@ with tf.Session() as sess:
 
 new_test_labels = [1 - l for l in utils.test_labels]
 
-print(precision_recall_fscore_support(new_test_labels, predicts, average = 'binary'))
+print(precision_recall_fscore_support(new_test_labels, predicts, average = 'macro'))
 print(roc_auc_score(new_test_labels, predicts))
 
     

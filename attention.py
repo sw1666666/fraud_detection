@@ -158,10 +158,10 @@ class BertModel(object):
     #  config.hidden_dropout_prob = 0.0
     #  config.attention_probs_dropout_prob = 0.0
     config.hidden_dropout_prob = tf.cond(is_training, 
-                                         lambda: config.hidden_dropout_prob, 
+                                         lambda: 0.5, 
                                          lambda: 0.0)
     config.attention_probs_dropout_prob = tf.cond(is_training, 
-                                         lambda: config.attention_probs_dropout_prob, 
+                                         lambda: 0.5, 
                                          lambda: 0.0)
 
     input_shape = get_shape_list(input_ids, expected_rank=2)
